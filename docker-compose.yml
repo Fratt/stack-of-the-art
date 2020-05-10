@@ -1,0 +1,37 @@
+version: '3.6'
+networks:
+  internal-net:
+   name: internal_network
+services:
+  tomcat:
+    image: openjdk:latest
+    container_name: tomcat
+    volumes:
+      - ./back/target/:/opt/assets/
+    command: java -jar /opt/assets/backend-0.0.1-SNAPSHOT.jar
+    networks:
+      - internal-net
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: always
+    environment:
+      MYSQL_DATABASE: setme
+      MYSQL_ROOT_PASSWORD: setme
+    ports:
+      - "3306:3306"
+    networks:
+      - internal-net
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./front/dist/front:/usr/share/nginx/html
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+    networks:
+      - internal-net
